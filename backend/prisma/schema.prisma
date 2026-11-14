@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  SISWA
+  PETUGAS
+  ADMIN
+}
+
+model Report {
+  id        Int      @id @default(autoincrement())
+  jenis     String
+  nama      String
+  kategori  String
+  lokasi    String
+  deskripsi String
+  foto      String?
+  status    String   @default("Menunggu")
+  createdAt DateTime @default(now()) @map("created_at")
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@map("reports")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(SISWA)
+  createdAt DateTime @default(now()) @map("created_at")
+  reports   Report[]
+
+  @@map("users")
+}
