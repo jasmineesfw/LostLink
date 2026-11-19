@@ -80,11 +80,19 @@ function ReportsList({ onReportChange }: ReportsListProps) {
     setSelectedReport(null);
   };
 
+  
   // Menyimpan perubahan laporan
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!editingReport) return;
+
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      alert("Silakan login terlebih dahulu.");
+      return;
+    }
 
     setSaving(true);
     setEditError("");
@@ -102,6 +110,9 @@ function ReportsList({ onReportChange }: ReportsListProps) {
 
       const response = await fetch(`${API_URL}/reports/${editingReport.id}`, {
         method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
@@ -114,9 +125,10 @@ function ReportsList({ onReportChange }: ReportsListProps) {
 
       setReports((previousReports) =>
         previousReports.map((report) =>
-          report.id === updatedReport.id ? updatedReport : report,
-        ),
+          report.id === updatedReport.id ? updatedReport : report
+        )
       );
+
       await fetchReports();
       await onReportChange();
 
@@ -131,11 +143,19 @@ function ReportsList({ onReportChange }: ReportsListProps) {
     }
   };
 
+  // Menandai barang berhasil dikembalikan
   const handleReturn = async () => {
     if (!selectedReport) return;
 
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      alert("Silakan login terlebih dahulu.");
+      return;
+    }
+
     const confirmed = window.confirm(
-      `Tandai "${selectedReport.nama}" sebagai berhasil dikembalikan?`,
+      `Tandai "${selectedReport.nama}" sebagai berhasil dikembalikan?`
     );
 
     if (!confirmed) return;
@@ -146,6 +166,9 @@ function ReportsList({ onReportChange }: ReportsListProps) {
 
       const response = await fetch(`${API_URL}/reports/${selectedReport.id}`, {
         method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
@@ -158,8 +181,8 @@ function ReportsList({ onReportChange }: ReportsListProps) {
 
       setReports((previousReports) =>
         previousReports.map((report) =>
-          report.id === updatedReport.id ? updatedReport : report,
-        ),
+          report.id === updatedReport.id ? updatedReport : report
+        )
       );
 
       setSelectedReport(updatedReport);
@@ -174,11 +197,19 @@ function ReportsList({ onReportChange }: ReportsListProps) {
     }
   };
 
+  // Menghapus laporan
   const handleDelete = async () => {
     if (!selectedReport) return;
 
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      alert("Silakan login terlebih dahulu.");
+      return;
+    }
+
     const confirmed = window.confirm(
-      `Apakah kamu yakin ingin menghapus laporan "${selectedReport.nama}"?`,
+      `Apakah kamu yakin ingin menghapus laporan "${selectedReport.nama}"?`
     );
 
     if (!confirmed) return;
@@ -188,6 +219,9 @@ function ReportsList({ onReportChange }: ReportsListProps) {
     try {
       const response = await fetch(`${API_URL}/reports/${selectedReport.id}`, {
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -195,8 +229,9 @@ function ReportsList({ onReportChange }: ReportsListProps) {
       }
 
       setReports((previousReports) =>
-        previousReports.filter((report) => report.id !== selectedReport.id),
+        previousReports.filter((report) => report.id !== selectedReport.id)
       );
+
       await fetchReports();
       await onReportChange();
 

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 interface ReportFormProps {
@@ -17,6 +18,14 @@ function ReportForm({ onReportChange }: ReportFormProps) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      setPesan("Silakan login terlebih dahulu untuk melaporkan barang.");
+      return;
+    }
+
     setLoading(true);
     setPesan("");
 
@@ -35,15 +44,19 @@ function ReportForm({ onReportChange }: ReportFormProps) {
 
       const response = await fetch("http://localhost:3000/reports", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Gagal mengirim laporan");
-      }
-
       const hasil = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          hasil.message || "Gagal mengirim laporan"
+        );
+      }
 
       setPesan(hasil.message || "Laporan berhasil dikirim!");
 
@@ -55,12 +68,11 @@ function ReportForm({ onReportChange }: ReportFormProps) {
       setFoto(null);
       setPreview("");
 
-      // Perbarui statistik di halaman utama
       await onReportChange();
     } catch (error) {
       console.error(error);
       setPesan(
-        error instanceof Error ? error.message : "Laporan gagal dikirim.",
+        error instanceof Error ? error.message : "Laporan gagal dikirim."
       );
     } finally {
       setLoading(false);
